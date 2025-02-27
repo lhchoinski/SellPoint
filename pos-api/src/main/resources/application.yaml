@@ -1,0 +1,49 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: pos
+
+  cache:
+    type: redis
+
+  data:
+    redis:
+      host: ${API_POS_REDIS_HOST}
+      port: ${API_POS_REDIS_PORT}
+      password: ${API_POS_REDIS_PASSWORD}
+      database: ${API_POS_REDIS_DB}
+
+  datasource:
+    url: jdbc:postgresql://${API_POS_DATABASE_HOST}:${API_POS_DATABASE_PORT}/${API_POS_DATABASE_DB}?currentSchema=${API_POS_DATABASE_SCHEMA}
+    username: ${API_POS_DATABASE_USERNAME}
+    password: ${API_POS_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    enabled: true
+    drop-first: false
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: public
+
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+  rabbitmq:
+    host: ${API_POS_RABBITMQ_HOST:localhost}
+    port: ${API_POS_RABBITMQ_PORT:5672}
+    username: ${API_POS_RABBITMQ_USERNAME:guest}
+    password: ${API_POS_RABBITMQ_PASSWORD:guest}
+    dynamic: true
+    auto-create: true
+    listener:
+      simple:
+        auto-startup: true
+  broker:
+    queue:
+      email:
+        name: default.email

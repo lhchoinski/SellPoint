@@ -1,0 +1,45 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: sales
+
+  cache:
+    type: redis
+
+  data:
+    redis:
+      host: ${API_PAYMENT_REDIS_HOST}
+      port: ${API_PAYMENT_REDIS_PORT}
+      password: ${API_PAYMENT_REDIS_PASSWORD}
+      database: ${API_PAYMENT_REDIS_DB}
+
+  datasource:
+    url: jdbc:postgresql://${API_PAYMENT_DATABASE_HOST}:${API_PAYMENT_DATABASE_PORT}/${API_PAYMENT_DATABASE_DB}?currentSchema=${API_PAYMENT_DATABASE_SCHEMA}
+    username: ${API_PAYMENT_DATABASE_USERNAME}
+    password: ${API_PAYMENT_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    enabled: true
+    drop-first: false
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: public
+
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+  rabbitmq:
+    host: ${API_PAYMENT_RABBITMQ_HOST}
+    port: ${API_PAYMENT_RABBITMQ_PORT}
+    username: ${API_PAYMENT_RABBITMQ_USERNAME}
+    password: ${API_PAYMENT_RABBITMQ_PASSWORD}
+
+broker:
+  queue:
+    email:
+      name: default.email
