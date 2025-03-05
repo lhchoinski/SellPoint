@@ -62,39 +62,20 @@ public class StockExitServiceImpl implements StockExitService {
     @Override
     @Transactional
     @RabbitListener(queues = "stock.queue")
-    public void create(SaleDTO saleDTO, @Headers Map<String, Object> headers) {
+    public String create(SaleDTO saleDTO) {
 
-        System.out.println("Stock: Atualizando estoque para a venda: " + saleDTO);
-
-//        List<StockExitDTO> stockExitDTOList = new ArrayList<>();
-//
         for (SaleItemDTO item : saleDTO.getItems()) {
-
-            if (item == null) {
-                System.err.println("Erro: item da venda é null");
-                break;
-            }
-
             StockExit stockExit = new StockExit();
-
-            stockExit.setItemId(item.getId());
-            stockExit.setUserId(saleDTO.getUser().getId());
+            stockExit.setItemId(item.getItemId());
+            stockExit.setUserId(UUID.randomUUID());
             stockExit.setQuantity(item.getQuantity());
             stockExit.setDate_exit(LocalDateTime.now());
 
             stockExitRepository.save(stockExit);
-
-//            stockExitDTOList.add(stockExitMapper.toDto(stockExit));
         }
-//
-//        String replyTo = (String) headers.get("amqp_replyTo");
-//
-//        if (replyTo != null) {
-//            rabbitTemplate.convertAndSend("", replyTo, stockExitDTOList);
-//            System.out.println("Stock: Resposta enviada para " + replyTo);
-//        } else {
-//            System.err.println("Erro: replyTo não encontrado, não foi possível enviar resposta.");
-//        }
+
+        System.out.println("Stock: Estoque atualizado, enviando resposta...");
+        return "OK";
     }
 
     @Override

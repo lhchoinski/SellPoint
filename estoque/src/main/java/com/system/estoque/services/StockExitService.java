@@ -6,11 +6,12 @@ import com.system.estoque.dtos.entities.StockExitDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.handler.annotation.Headers;
 
+import java.util.List;
 import java.util.Map;
 
 public interface StockExitService {
 
-    void create(SaleDTO saleDTO, @Headers Map<String, Object> headers);
+    String create(SaleDTO saleDTO);
 
     PageDTO<StockExitDTO> findAll(String search, Pageable pageable);
 

@@ -21,13 +21,18 @@ public class SaleServiceImpl implements SaleService {
         try {
             processPayment(saleRequest);
 
-            StockExitDTO stockResponse = (StockExitDTO) rabbitTemplate.convertSendAndReceive("ecommerce.exchange", "stock.key", saleRequest);
+            String stockResponse = (String) rabbitTemplate.convertSendAndReceive(
+                    "ecommerce.exchange",
+                    "stock.key",
+                    saleRequest
+            );
 
-            if (stockResponse != null) {
-                System.out.println("Venda processada com sucesso! Estoque atualizado: " + stockResponse);
+            if (stockResponse != null && stockResponse.equals("OK")) {
+                System.out.println("Venda processada com sucesso! Estoque atualizado.");
             } else {
                 System.err.println("Erro: Não houve resposta do estoque.");
             }
+
 
         } catch (Exception e) {
             System.err.println("Erro ao processar venda: " + e.getMessage());
