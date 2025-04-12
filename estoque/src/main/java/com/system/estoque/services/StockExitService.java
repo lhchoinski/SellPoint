@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface StockExitService {
 
-    void create(SaleDTO saleDTO, @Headers Map<String, Object> headers);
+    void create(SaleDTO saleDTO);
 
     PageDTO<StockExitDTO> findAll(String search, Pageable pageable);
 

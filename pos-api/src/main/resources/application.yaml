@@ -47,3 +47,14 @@ spring:
     queue:
       email:
         name: default.email
+
+api:
+  security:
+    token:
+      secret: fba927a58b0952af9234be3b8a576b8f
+      access:
+        expiration: 500000
+        refresh:
+          expiration: 1500000
+
+api-prefix: /api
