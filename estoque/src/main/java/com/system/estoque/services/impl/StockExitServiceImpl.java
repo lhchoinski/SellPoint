@@ -60,37 +60,28 @@ public class StockExitServiceImpl implements StockExitService {
     @Transactional
     @RabbitListener(queues = "stock.queue")
     public String create(SaleDTO saleDTO) {
+        try {
+            for (SaleItemDTO item : saleDTO.getItems()) {
 
-        for (SaleItemDTO item : saleDTO.getItems()) {
-            StockExit stockExit = new StockExit();
-            stockExit.setItemId(item.getItemId());
-            stockExit.setUserId(UUID.randomUUID());
-            stockExit.setQuantity(item.getQuantity());
-            stockExit.setDate_exit(LocalDateTime.now());
-            try {
-                for (SaleItemDTO item : saleDTO.getItems()) {
+                StockExit stockExit = new StockExit();
 
-                    StockExit stockExit = new StockExit();
+                stockExit.setItemId(item.getItemId());
+                stockExit.setUserId(saleDTO.getUser().getId());
+                stockExit.setQuantity(item.getQuantity());
+                stockExit.setDate_exit(LocalDateTime.now());
 
-                    stockExit.setItemId(item.getItemId());
-                    stockExit.setUserId(saleDTO.getUser().getId());
-                    stockExit.setQuantity(item.getQuantity());
-                    stockExit.setDate_exit(LocalDateTime.now());
+                updateStock(item.getItemId(), item.getQuantity());
 
-                    updateStock(item.getItemId(), item.getQuantity());
-
-                    stockExitRepository.save(stockExit);
-
-                }
-
-                return "OK";
-
-            } catch (Exception e) {
-                throw new BadRequestException(e.getMessage());
+                stockExitRepository.save(stockExit);
 
             }
+
+            return "OK";
+
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+
         }
-        return null;
     }
 
     private void updateStock(Long idItem, Long quantity) {
@@ -104,9 +95,6 @@ public class StockExitServiceImpl implements StockExitService {
         item.setQuantity(result);
 
         itemRepository.save(item);
-
-        System.out.println("Stock: Estoque atualizado, enviando resposta...");
-        return "OK";
     }
 
     @Override
