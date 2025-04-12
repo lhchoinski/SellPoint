@@ -19,16 +19,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -62,33 +59,44 @@ public class StockExitServiceImpl implements StockExitService {
     @Override
     @Transactional
     @RabbitListener(queues = "stock.queue")
-    public void create(SaleDTO saleDTO) {
+    public String create(SaleDTO saleDTO) {
 
-        try {
-            for (SaleItemDTO item : saleDTO.getItems()) {
+        for (SaleItemDTO item : saleDTO.getItems()) {
+            StockExit stockExit = new StockExit();
+            stockExit.setItemId(item.getItemId());
+            stockExit.setUserId(UUID.randomUUID());
+            stockExit.setQuantity(item.getQuantity());
+            stockExit.setDate_exit(LocalDateTime.now());
+            try {
+                for (SaleItemDTO item : saleDTO.getItems()) {
 
-                StockExit stockExit = new StockExit();
+                    StockExit stockExit = new StockExit();
 
-                stockExit.setItemId(item.getItemId());
-                stockExit.setUserId(saleDTO.getUser().getId());
-                stockExit.setQuantity(item.getQuantity());
-                stockExit.setDate_exit(LocalDateTime.now());
+                    stockExit.setItemId(item.getItemId());
+                    stockExit.setUserId(saleDTO.getUser().getId());
+                    stockExit.setQuantity(item.getQuantity());
+                    stockExit.setDate_exit(LocalDateTime.now());
 
-                updateStock(item.getItemId(), item.getQuantity());
+                    updateStock(item.getItemId(), item.getQuantity());
 
-                stockExitRepository.save(stockExit);
+                    stockExitRepository.save(stockExit);
+
+                }
+
+                return "OK";
+
+            } catch (Exception e) {
+                throw new BadRequestException(e.getMessage());
 
             }
-
-        } catch (Exception e){
-            throw new BadRequestException(e.getMessage());
         }
+        return null;
     }
 
     private void updateStock(Long idItem, Long quantity) {
         Item item = getItem(idItem);
 
-        if(quantity > item.getQuantity()) {
+        if (quantity > item.getQuantity()) {
             throw new BadRequestException("Quantity exceeds stock exit quantity");
         }
 
@@ -96,6 +104,9 @@ public class StockExitServiceImpl implements StockExitService {
         item.setQuantity(result);
 
         itemRepository.save(item);
+
+        System.out.println("Stock: Estoque atualizado, enviando resposta...");
+        return "OK";
     }
 
     @Override

@@ -1,15 +1,12 @@
 package com.system.sales.services.impl;
 
 import com.system.sales.dtos.SaleDTO;
-import com.system.sales.dtos.StockExitDTO;
 import com.system.sales.services.SaleService;
 import exeptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +19,18 @@ public class SaleServiceImpl implements SaleService {
         try {
             processPayment(saleRequest);
 
-            rabbitTemplate.convertSendAndReceive("stock.key", saleRequest);
+            String stockResponse = (String) rabbitTemplate.convertSendAndReceive(
+                    "ecommerce.exchange",
+                    "stock.key",
+                    saleRequest
+            );
+
+            if (stockResponse != null && stockResponse.equals("OK")) {
+                System.out.println("Venda processada com sucesso! Estoque atualizado.");
+            } else {
+                System.err.println("Erro: Não houve resposta do estoque.");
+            }
+
 
         } catch (Exception e) {
             System.err.println("Erro ao processar venda: " + e.getMessage());
