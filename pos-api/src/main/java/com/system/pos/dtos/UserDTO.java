@@ -2,6 +2,7 @@ package com.system.pos.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.system.pos.dtos.groups.AppGroup;
+import com.system.pos.enums.Role;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,4 +42,7 @@ public class UserDTO implements Serializable {
 
     @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class})
     private Boolean active;
+
+    @JsonView({AppGroup.Request.class, AppGroup.ResponsePage.class})
+    private String role;
 }

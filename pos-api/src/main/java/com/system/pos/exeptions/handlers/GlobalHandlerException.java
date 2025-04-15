@@ -1,7 +1,5 @@
 package com.system.pos.exeptions.handlers;
 
-import com.system.pos.exeptions.BadRequestException;
-import com.system.pos.exeptions.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -28,22 +26,6 @@ public class GlobalHandlerException {
         body.put("message", "Erro interno do servidor");
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequestException(BadRequestException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFoundException(NotFoundException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 }

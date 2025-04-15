@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
                 .withUsername(usuario.getUsername())
                 .password(usuario.getPassword())
-//                .roles(usuario.getRole().name())
+                .roles(usuario.getRole().name())
                 .build();
     }
 
@@ -42,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         UserDTO userDTO = new UserDTO();
         userDTO.setUserName(user.get().getUsername());
         userDTO.setPassword(user.get().getPassword());
-//        usuarioDTO.setRole(usuario.get().getRole().name());
+        userDTO.setRole(user.get().getRole().name());
         userDTO.setEmail(user.get().getEmail());
         userDTO.setName(user.get().getName());
         userDTO.setActive(user.get().getActive());

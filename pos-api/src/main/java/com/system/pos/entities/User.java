@@ -1,6 +1,7 @@
 package com.system.pos.entities;
 
 import com.system.pos.entities.base.BaseSoftDeleteEntity;
+import com.system.pos.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ public class User extends BaseSoftDeleteEntity implements UserDetails {
 
     private String name;
 
-    @Column(name = "user_name")
+    @Column(name = "username")
     private String userName;
 
     private String email;
@@ -37,14 +38,16 @@ public class User extends BaseSoftDeleteEntity implements UserDetails {
 
     private Boolean active;
 
+    private Role role;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
-    @Override
     public String getUsername() {
-        return "";
+        return userName;
     }
+
 }

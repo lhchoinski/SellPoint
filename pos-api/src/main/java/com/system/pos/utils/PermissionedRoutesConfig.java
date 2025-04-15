@@ -5,6 +5,7 @@ import com.system.pos.components.providers.JwtUtil;
 import com.system.pos.services.impl.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,17 +28,18 @@ public class PermissionedRoutesConfig {
         this.customUserDetailsService = userDetailsService;
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChainAdmin(HttpSecurity httpSecurity) throws Exception {
-//        return httpSecurity
-//                .csrf(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/admin").hasRole("ADMIN")
-//                        .anyRequest().authenticated()
-//                )
-//                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-//                .build();
-//    }
+    @Bean
+    @Order(1)
+    public SecurityFilterChain securityFilterChainAdmin(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                .securityMatcher("/admin/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().hasRole("ADMIN")
+                )
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {

@@ -1,7 +1,9 @@
 package com.system.pos.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.system.pos.dtos.auth.AuthenticatedUserDTO;
 import com.system.pos.dtos.groups.AppGroup;
+import com.system.pos.interfaces.AuthenticatedUser;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +23,7 @@ public class SaleDTO implements Serializable {
     private List<SaleItemDTO> items;
 
     @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class})
-    private UserDTO user;
+    private AuthenticatedUserDTO user;
 
     @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class})
     private CustomerDTO customer;

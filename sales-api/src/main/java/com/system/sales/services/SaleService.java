@@ -1,6 +1,7 @@
 package com.system.sales.services;
 
-public interface SaleService {
+import com.system.sales.dtos.SaleDTO;
 
-//    void processSale(String saleData);
+public interface SaleService {
+     void processSales(SaleDTO saleRequest);
 }
