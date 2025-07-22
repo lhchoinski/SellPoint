@@ -10,8 +10,8 @@
 
     <modules>
         <module>payment-api</module>
-        <module>email</module>
-        <module>estoque</module>
+        <module>email-service</module>
+        <module>stock-api</module>
         <module>pos-api</module>
         <module>sales-api</module>
     </modules>

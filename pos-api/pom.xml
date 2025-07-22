@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.system.pos</groupId>
-	<artifactId>pos</artifactId>
+	<artifactId>pos-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>pos</name>
 	<description>Project of pos</description>
