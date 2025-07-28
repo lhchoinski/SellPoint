@@ -49,7 +49,7 @@
     </changeSet>
 
     <changeSet id="2" author="luiz">
-        <createTable tableName="items">
+        <createTable tableName="products">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -146,7 +146,7 @@
                 baseTableName="stock_entries"
                 baseColumnNames="item_id"
                 constraintName="fk_stock_entries_item"
-                referencedTableName="items"
+                referencedTableName="products"
                 referencedColumnNames="id"
                 onDelete="CASCADE"/>
     </changeSet>
@@ -193,7 +193,7 @@
                 baseTableName="stock_exits"
                 baseColumnNames="item_id"
                 constraintName="fk_stock_exits_item"
-                referencedTableName="items"
+                referencedTableName="products"
                 referencedColumnNames="id"
                 onDelete="CASCADE"/>
     </changeSet>

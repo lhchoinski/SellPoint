@@ -32,6 +32,12 @@
     </properties>
     <dependencies>
 
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>3.25.2</version>
+        </dependency>
+
         <!--Liquibase-->
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -114,6 +120,12 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.system.pos</groupId>
+            <artifactId>pos-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -6,7 +6,7 @@ VALUES ('ADMIN', 'admin', 'admin@exemplo.com',
         '$2a$10$lSrI2h./WOgFdyM7vkO9..gq50bfPluo0HyAHA7ySVldjaYCERMpu', '00000000000', '00000000000',true, 0, now());
 
 -- changeset Luiz:20250106-02-02
-INSERT INTO items (name, description, price, quantity, active, version, created_at)
+INSERT INTO products (name, description, price, quantity, active, version, created_at)
 VALUES
     ('BANANA', 'Banana', '3.00',  20 ,true,  0,now()),
     ('BOLACHA', 'Bolacha', '5.50', 20 , true, 0,now()),

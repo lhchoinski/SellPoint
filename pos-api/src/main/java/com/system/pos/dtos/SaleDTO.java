@@ -1,35 +1,20 @@
 package com.system.pos.dtos;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.system.pos.dtos.auth.AuthenticatedUserDTO;
-import com.system.pos.dtos.groups.AppGroup;
-import com.system.pos.interfaces.AuthenticatedUser;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
-@Getter
-@Setter
-public class SaleDTO implements Serializable {
-
-    @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class})
-    private Long id;
-
-    @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class, AppGroup.Request.class})
-    @NotNull(message = "{required_message}")
-    private List<SaleItemDTO> items;
-
-    @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class})
-    private AuthenticatedUserDTO user;
-
-    @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class})
-    private CustomerDTO customer;
-
-    @JsonView({AppGroup.Request.class})
-    @NotNull(message = "{required_message}")
-    private Long customerId;
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class SaleDTO {
+    private UUID id;
+    private UUID customerId;
+    private List<SaleProduct> saleProducts;
+    private LocalDateTime timestamp;
 }
+

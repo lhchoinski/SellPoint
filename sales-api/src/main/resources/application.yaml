@@ -24,7 +24,7 @@ spring:
   liquibase:
     enabled: true
     drop-first: false
-    change-log: classpath:db/changelog/db.changelog-master.xml
+    change-log: classpath:db/changelog/db.changelog-master-sales.xml
     default-schema: public
 
   jpa:
@@ -38,8 +38,10 @@ spring:
     port: ${API_SALES_RABBITMQ_PORT}
     username: ${API_SALES_RABBITMQ_USERNAME}
     password: ${API_SALES_RABBITMQ_PASSWORD}
-
-broker:
-  queue:
-    email:
-      name: default.email
+    exchanges:
+      sales: sales-exchange
+    routing-keys:
+      sale-started: sale.started
+      sale-completed: sale.completed
+      sale-failed: sale.failed
+      inventory-request: inventory.product.request

@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: pos
+    name: pos-api
 
   cache:
     type: redis
@@ -38,23 +38,10 @@ spring:
     port: ${API_POS_RABBITMQ_PORT:5672}
     username: ${API_POS_RABBITMQ_USERNAME:guest}
     password: ${API_POS_RABBITMQ_PASSWORD:guest}
-    dynamic: true
-    auto-create: true
-    listener:
-      simple:
-        auto-startup: true
-  broker:
-    queue:
-      email:
-        name: default.email
-
-api:
-  security:
-    token:
-      secret: fba927a58b0952af9234be3b8a576b8f
-      access:
-        expiration: 500000
-        refresh:
-          expiration: 1500000
-
-api-prefix: /api
+    exchanges:
+      sales: sales-exchange
+    routing-keys:
+      sale-started: sale.started
+      sale-completed: sale.completed
+      sale-failed: sale.failed
+      inventory-request: inventory.product.request
