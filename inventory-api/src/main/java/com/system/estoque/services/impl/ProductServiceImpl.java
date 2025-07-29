@@ -1,10 +1,10 @@
 package com.system.estoque.services.impl;
 
-import com.system.estoque.dtos.entities.ProductDTO;
+import com.system.estoque.dtos.entities.ProductDTO2;
 import com.system.estoque.dtos.PageDTO;
 import com.system.estoque.entities.Product;
 import com.system.estoque.exeptions.NotFoundException;
-import com.system.estoque.mappers.ItemMapper;
+import com.system.estoque.mappers.ProductMapper;
 import com.system.estoque.repositories.ProductRepository;
 import com.system.estoque.services.ProductService;
 import com.system.estoque.services.specification.ItemSpecification;
@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,20 +22,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private final ItemMapper itemMapper;
+    private final ProductMapper productMapper;
     private final ProductRepository productRepository;
 
     @Override
-    public PageDTO<ProductDTO> findAll(String search, Pageable pageable) {
+    public PageDTO<ProductDTO2> findAll(String search, Pageable pageable) {
         Specification<Product> spec = Specification.where(ItemSpecification.isNotDeleted())
                 .and(ItemSpecification.hasNameContaining(search));
 
         Page<Product> itemPage = productRepository.findAll(spec, pageable);
 
-        List<ProductDTO> productDTOS = itemMapper.toItemDTOs(itemPage.getContent());
+        List<ProductDTO2> productDTO2s = productMapper.toItemDTOs(itemPage.getContent());
 
         return new PageDTO<>(
-                productDTOS,
+                productDTO2s,
                 itemPage.getTotalPages(),
                 itemPage.getTotalElements(),
                 itemPage.getNumber(),
@@ -46,35 +45,35 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDTO create(ProductDTO productDTO) {
+    public ProductDTO2 create(ProductDTO2 productDTO2) {
 
-        if (productDTO.getName() != null) {
-            productDTO.setName(productDTO.getName().toUpperCase());
+        if (productDTO2.getName() != null) {
+            productDTO2.setName(productDTO2.getName().toUpperCase());
         }
 
-        Product product = itemMapper.toEntity(productDTO);
+        Product product = productMapper.toEntity(productDTO2);
 //        product.setActive(true);
 
         productRepository.save(product);
 
-        return itemMapper.toDto(product);
+        return productMapper.toDto(product);
     }
 
     @Override
-    public ProductDTO findById(UUID id) {
+    public ProductDTO2 findById(UUID id) {
         Product product = getItem(id);
-        return itemMapper.toDto(product);
+        return productMapper.toDto(product);
     }
 
     @Override
     @Transactional
-    public ProductDTO update(ProductDTO productDTO) {
-        Product product = getItem(productDTO.getId());
+    public ProductDTO2 update(ProductDTO2 productDTO2) {
+        Product product = getItem(productDTO2.getId());
 
-        itemMapper.partialUpdate(productDTO, product);
+        productMapper.partialUpdate(productDTO2, product);
         productRepository.save(product);
 
-        return itemMapper.toDto(product);
+        return productMapper.toDto(product);
     }
 
     @Override
@@ -86,7 +85,7 @@ public class ProductServiceImpl implements ProductService {
 //            throw new BadRequestException("Item is still active");
 //        }
 
-        product.setDeletedAt(LocalDateTime.now());
+//        product.setDeletedAt(LocalDateTime.now());
 
         productRepository.save(product);
     }
@@ -118,7 +117,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Product getItem(UUID id) throws NotFoundException {
-        return productRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(()
+        return productRepository.findById(id).orElseThrow(()
                 -> new NotFoundException("Item not found"));
     }
 }

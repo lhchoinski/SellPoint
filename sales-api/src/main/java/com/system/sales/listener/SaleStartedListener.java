@@ -12,7 +12,7 @@ public class SaleStartedListener {
 
     private final SaleService saleService;
 
-    @RabbitListener(queues = "sales.sale.started")
+    @RabbitListener(queues = "sales.sale.started", concurrency = "50")
     public void handleSaleStarted(SaleDTO saleDTO) {
         saleService.processSaleStarted(saleDTO);
     }

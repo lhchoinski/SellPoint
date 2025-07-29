@@ -1,16 +1,15 @@
 package com.system.sales.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.sales.dto.Product;
+import com.system.sales.dto.ProductDTO;
 import com.system.sales.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,25 +26,19 @@ public class InventoryServiceImpl implements InventoryService {
     @Value("${spring.rabbitmq.routing-keys.inventory.product}")
     private String routingKey;
 
-    @Override
-    public List<Product> findProductsByIds(List<UUID> productIds) {
-//        try {
+    public ProductDTO findProductsById(UUID productId) {
+        try {
+            String json = (String) rabbitTemplate.convertSendAndReceive(exchange, routingKey, productId.toString());
 
+            if (json == null) {
+                throw new RuntimeException("Timeout ou erro ao obter resposta do inventory");
+            }
 
-            // Faz o envio da mensagem e espera a resposta (RPC)
-            rabbitTemplate.convertAndSend(exchange, routingKey, productIds);
+            return objectMapper.readValue(json, ProductDTO.class);
 
-//            if (responseJson == null) {
-//                throw new RuntimeException("Timeout ou erro ao obter resposta do inventory");
-//            }
-//
-//            // Converte o JSON recebido para lista de Products
-//            return objectMapper.readValue(responseJson, new TypeReference<>() {
-//            });
-//        } catch (Exception e) {
-//            throw new RuntimeException("Erro na consulta de produtos no inventory via RabbitMQ", e);
-//        }
-        return new ArrayList<>();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro na consulta de produto no inventory via RabbitMQ", e);
+        }
     }
 }
 

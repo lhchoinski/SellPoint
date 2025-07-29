@@ -1,7 +1,7 @@
 package com.system.estoque.controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.system.estoque.dtos.entities.ProductDTO;
+import com.system.estoque.dtos.entities.ProductDTO2;
 import com.system.estoque.dtos.PageDTO;
 import com.system.estoque.dtos.groups.AppGroup;
 import com.system.estoque.services.ProductService;
@@ -27,7 +27,7 @@ public class ItemController {
 
     @Operation(summary = "Find all", description = "Find all items")
     @GetMapping
-    public PageDTO<ProductDTO> findAll(
+    public PageDTO<ProductDTO2> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search
@@ -39,35 +39,35 @@ public class ItemController {
     @Operation(summary = "Create", description = "Create item")
     @PostMapping
     @JsonView(AppGroup.Response.class)
-    public ResponseEntity<ProductDTO> create(
+    public ResponseEntity<ProductDTO2> create(
             @RequestBody
             @Valid
             @JsonView(AppGroup.Request.class)
-            ProductDTO productDTO
+            ProductDTO2 productDTO2
     ) {
 
-        return ResponseEntity.ok(productService.create(productDTO));
+        return ResponseEntity.ok(productService.create(productDTO2));
     }
 
     @Operation(summary = "Find by id", description = "Find item by id")
     @GetMapping("/{id}")
     @JsonView(AppGroup.ResponsePage.class)
-    public ResponseEntity<ProductDTO> findById(@PathVariable("id") UUID id) {
+    public ResponseEntity<ProductDTO2> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(productService.findById(id));
     }
 
     @Operation(summary = "Update", description = "Update item")
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDTO> update(
+    public ResponseEntity<ProductDTO2> update(
             @PathVariable("id") UUID id,
             @Validated(AppGroup.Request.class)
             @RequestBody
             @JsonView(AppGroup.Request.class)
-            ProductDTO productDTO
+            ProductDTO2 productDTO2
     ) {
-        productDTO.setId(id);
+        productDTO2.setId(id);
 
-        return ResponseEntity.ok(productService.update(productDTO));
+        return ResponseEntity.ok(productService.update(productDTO2));
     }
 
     @Operation(summary = "Delete", description = "Delete item")

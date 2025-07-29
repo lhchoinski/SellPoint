@@ -14,12 +14,23 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.exchanges.sales}")
     private String salesExchange;
 
+    @Value("${spring.rabbitmq.exchanges.inventory}")
+    private String inventoryExchange;
+
     @Value("${spring.rabbitmq.routing-keys.sale-started}")
     private String routingKey;
+
+    @Value("${spring.rabbitmq.routing-keys.inventory.product}")
+    private String inventoryRoutingKey;
 
     @Bean
     public TopicExchange salesExchange() {
         return new TopicExchange(salesExchange);
+    }
+
+    @Bean
+    public TopicExchange inventoryExchange() {
+        return new TopicExchange(inventoryExchange);
     }
 
     @Bean
@@ -28,10 +39,22 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue inventoryStartedQueue() {
+        return new Queue("inventory.product.request", true);
+    }
+
+    @Bean
     public Binding saleStartedBinding() {
         return BindingBuilder.bind(saleStartedQueue())
                 .to(salesExchange())
                 .with(routingKey);
+    }
+
+    @Bean
+    public Binding inventoryStartedBinding() {
+        return BindingBuilder.bind(inventoryStartedQueue())
+                .to(inventoryExchange())
+                .with(inventoryRoutingKey);
     }
 
     @Bean

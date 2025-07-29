@@ -18,7 +18,7 @@ public class StockExitDTO implements Serializable {
     private Long id;
 
     @JsonView({AppGroup.Response.class, AppGroup.ResponsePage.class})
-    private ProductDTO item;
+    private ProductDTO2 item;
 
     @JsonView({AppGroup.Request.class})
     @NotNull(message = "{required_message}")

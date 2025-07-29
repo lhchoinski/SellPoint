@@ -1,4 +1,4 @@
-package com.system.sales.dto;
+package com.system.estoque.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class Product {
+public class ProductDTO {
     private UUID id;
     private Integer quantity;
     private BigDecimal price;

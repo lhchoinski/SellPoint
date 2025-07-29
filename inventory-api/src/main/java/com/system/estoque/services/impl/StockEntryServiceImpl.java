@@ -114,7 +114,7 @@ public class StockEntryServiceImpl implements StockEntryService {
     }
 
     private Product getProduct(UUID id) throws NotFoundException {
-        return productRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(()
+        return productRepository.findById(id).orElseThrow(()
                 -> new NotFoundException("Item not found"));
     }
 }

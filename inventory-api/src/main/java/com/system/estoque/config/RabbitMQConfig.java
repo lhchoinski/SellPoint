@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${spring.rabbitmq.exchanges.sales}")
+    @Value("${spring.rabbitmq.exchanges.inventory}")
     private String salesExchange;
 
-    @Value("${spring.rabbitmq.routing-keys.inventory-request}")
+    @Value("${spring.rabbitmq.routing-keys.inventory.product}")
     private String routingKey;
 
     @Bean
@@ -23,13 +23,14 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue saleStartedQueue() {
+    public Queue inventoryProductRequestQueue() {
         return new Queue("inventory.product.request", true);
     }
 
     @Bean
-    public Binding saleStartedBinding() {
-        return BindingBuilder.bind(saleStartedQueue())
+    public Binding inventoryProductBinding() {
+        return BindingBuilder
+                .bind(inventoryProductRequestQueue())
                 .to(salesExchange())
                 .with(routingKey);
     }

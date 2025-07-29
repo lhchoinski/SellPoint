@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "products")
-public class Product extends BaseSoftDeleteEntity {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

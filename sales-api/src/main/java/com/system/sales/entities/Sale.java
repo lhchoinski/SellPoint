@@ -1,6 +1,6 @@
 package com.system.sales.entities;
 
-import com.system.sales.dto.Product;
+import com.system.sales.dto.ProductDTO;
 import com.system.sales.enums.SaleStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -36,8 +36,8 @@ public class Sale {
 
     private LocalDateTime timestamp;
 
-    public BigDecimal calculateTotalAmount(List<Product> saleProducts) {
-        return saleProducts.stream()
+    public BigDecimal calculateTotalAmount(List<ProductDTO> saleProductDTOS) {
+        return saleProductDTOS.stream()
                 .map(saleProduct -> saleProduct.getPrice().multiply(BigDecimal.valueOf(saleProduct.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

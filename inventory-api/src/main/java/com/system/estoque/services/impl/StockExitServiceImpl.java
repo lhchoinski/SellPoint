@@ -138,7 +138,7 @@ public class StockExitServiceImpl implements StockExitService {
     }
 
     private Product getItem(UUID id) throws NotFoundException {
-        return productRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(()
+        return productRepository.findById(id).orElseThrow(()
                 -> new NotFoundException("Item not found"));
     }
 }

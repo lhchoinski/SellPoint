@@ -40,8 +40,11 @@ spring:
     password: ${API_ESTOQUE_RABBITMQ_PASSWORD}
     exchanges:
       sales: sales-exchange
+      inventory: inventory-exchange
     routing-keys:
       sale-started: sale.started
       sale-completed: sale.completed
       sale-failed: sale.failed
-      inventory-request: inventory.product.request
+      inventory:
+        reserve: inventory.reserve
+        product: inventory.product.request
