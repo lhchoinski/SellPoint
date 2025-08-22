@@ -1,6 +1,6 @@
 package com.system.sales.dto.inventory;
 
-import com.system.sales.dto.SaleProduct;
+import com.system.sales.dto.SaleProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,5 +14,5 @@ import java.util.UUID;
 public class StockReserveCommand {
 
     private UUID saleId;
-    private List<SaleProduct> SaleProducts;
+    private List<SaleProductDTO> saleProductDTOS;
 }

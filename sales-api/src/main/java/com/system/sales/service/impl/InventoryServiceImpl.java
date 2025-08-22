@@ -1,16 +1,13 @@
 package com.system.sales.service.impl;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.sales.dto.ProductDTO;
+import com.system.sales.dto.ProductInventoryDTO;
 import com.system.sales.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,7 +23,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Value("${spring.rabbitmq.routing-keys.inventory.product}")
     private String routingKey;
 
-    public ProductDTO findProductsById(UUID productId) {
+    public ProductInventoryDTO findProductsById(UUID productId) {
         try {
             String json = (String) rabbitTemplate.convertSendAndReceive(exchange, routingKey, productId.toString());
 
@@ -34,10 +31,10 @@ public class InventoryServiceImpl implements InventoryService {
                 throw new RuntimeException("Timeout ou erro ao obter resposta do inventory");
             }
 
-            return objectMapper.readValue(json, ProductDTO.class);
+            return objectMapper.readValue(json, ProductInventoryDTO.class);
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro na consulta de produto no inventory via RabbitMQ", e);
+            throw new RuntimeException("search error on RabbitMQ", e);
         }
     }
 }

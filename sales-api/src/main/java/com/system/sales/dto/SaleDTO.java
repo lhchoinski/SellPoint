@@ -14,7 +14,7 @@ import java.util.UUID;
 public class SaleDTO {
     private UUID id;
     private UUID customerId;
-    private List<SaleProduct> saleProducts;
+    private List<SaleProductDTO> saleProductDTOS;
     private LocalDateTime timestamp;
 }
 

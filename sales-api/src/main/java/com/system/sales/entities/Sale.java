@@ -1,6 +1,5 @@
 package com.system.sales.entities;
 
-import com.system.sales.dto.ProductDTO;
 import com.system.sales.enums.SaleStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,9 +34,12 @@ public class Sale {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SaleProduct> products = new ArrayList<>();
+
     private LocalDateTime timestamp;
 
-    public BigDecimal calculateTotalAmount(List<ProductDTO> saleProductDTOS) {
+    public BigDecimal calculateTotalAmount(List<SaleProduct> saleProductDTOS) {
         return saleProductDTOS.stream()
                 .map(saleProduct -> saleProduct.getPrice().multiply(BigDecimal.valueOf(saleProduct.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

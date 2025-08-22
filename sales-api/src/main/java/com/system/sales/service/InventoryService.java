@@ -1,10 +1,10 @@
 package com.system.sales.service;
 
-import com.system.sales.dto.ProductDTO;
+import com.system.sales.dto.ProductInventoryDTO;
 
 import java.util.UUID;
 
 public interface InventoryService {
 
-    ProductDTO findProductsById(UUID saleProductsId);
+    ProductInventoryDTO findProductsById(UUID saleProductsId);
 }

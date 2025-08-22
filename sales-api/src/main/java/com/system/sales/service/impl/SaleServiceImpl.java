@@ -2,15 +2,15 @@ package com.system.sales.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system.sales.component.DistributedLockComponent;
-import com.system.sales.dto.ProductDTO;
+import com.system.sales.dto.ProductInventoryDTO;
 import com.system.sales.dto.SaleDTO;
-import com.system.sales.dto.SaleProduct;
 import com.system.sales.dto.inventory.StockReserveCommand;
 import com.system.sales.entities.OutboxEvent;
 import com.system.sales.entities.Sale;
+import com.system.sales.entities.SaleProduct;
 import com.system.sales.enums.OutboxStatus;
-import com.system.sales.producer.InventoryPublisher;
 import com.system.sales.repositories.OutboxEventRepository;
+import com.system.sales.repositories.SaleProductRepository;
 import com.system.sales.repositories.SaleRepository;
 import com.system.sales.service.InventoryService;
 import com.system.sales.service.SaleService;
@@ -19,10 +19,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static com.system.sales.enums.SaleStatus.IN_PROGRESS;
 
@@ -32,36 +31,50 @@ import static com.system.sales.enums.SaleStatus.IN_PROGRESS;
 public class SaleServiceImpl implements SaleService {
 
     private final SaleRepository saleRepository;
+    private final SaleProductRepository saleProductRepository;
+
     private final DistributedLockComponent distributedLockComponent;
     private final OutboxEventRepository outboxEventRepository;
 
-    private final InventoryPublisher inventoryPublisher;
     private final InventoryService inventoryService;
 
     private final ObjectMapper objectMapper;
 
     @Override
+    @Transactional
     public void processSaleStarted(SaleDTO saleDTO) {
-        long startTime = System.currentTimeMillis();
         String lockKey = "sale:lock:" + saleDTO.getId();
 
         distributedLockComponent.executeWithLock(lockKey, 5, 10, () -> {
             try {
 
-                List<ProductDTO> products = new ArrayList<>();
-               saleDTO.getSaleProducts().forEach(product -> {
-                   products.add(inventoryService.findProductsById(product.getId()));
-                });
-
                 Sale sale = new Sale();
                 sale.setSaleStatus(IN_PROGRESS);
                 sale.setCustomerId(saleDTO.getCustomerId());
                 sale.setTimestamp(LocalDateTime.now());
-                sale.setTotalAmount(sale.calculateTotalAmount(products));
+                sale.setTotalAmount(BigDecimal.ZERO);
 
                 saleRepository.save(sale);
 
-                StockReserveCommand command = new StockReserveCommand(saleDTO.getId(), saleDTO.getSaleProducts());
+                List<SaleProduct> saleProducts = saleDTO.getSaleProductDTOS().stream().map(product -> {
+                    ProductInventoryDTO productInventory = inventoryService.findProductsById(product.getId());
+
+                    SaleProduct saleProduct = new SaleProduct();
+                    saleProduct.setSale(sale);
+                    saleProduct.setName(productInventory.getName());
+                    saleProduct.setProductId(productInventory.getId());
+                    saleProduct.setPrice(productInventory.getPrice());
+                    saleProduct.setQuantity(product.getQuantity());
+
+                    return saleProduct;
+                }).toList();
+
+                saleProductRepository.saveAll(saleProducts);
+
+                sale.setTotalAmount(sale.calculateTotalAmount(saleProducts));
+                saleRepository.save(sale);
+
+                StockReserveCommand command = new StockReserveCommand(sale.getId(), saleDTO.getSaleProductDTOS());
 
                 OutboxEvent outbox = OutboxEvent.builder()
                         .aggregateType("SALE")
@@ -73,12 +86,10 @@ public class SaleServiceImpl implements SaleService {
                         .build();
 
                 outboxEventRepository.save(outbox);
-                long endTime = System.currentTimeMillis();
-                log.info("Processamento da venda {} concluído em {} ms", saleDTO.getId(), (endTime - startTime));
-            } catch (Exception e) {
-                throw new RuntimeException("Erro ao processar venda e outbox", e);
-            }
 
+            } catch (Exception e) {
+                throw new RuntimeException("Error", e);
+            }
             return null;
         });
     }
