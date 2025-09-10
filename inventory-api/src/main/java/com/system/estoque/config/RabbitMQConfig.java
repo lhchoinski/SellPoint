@@ -17,6 +17,9 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.routing-keys.inventory.product}")
     private String routingKey;
 
+    @Value("${spring.rabbitmq.routing-keys.inventory.reserve}")
+    private String routingKeyReserve;
+
     @Bean
     public TopicExchange salesExchange() {
         return new TopicExchange(salesExchange);
@@ -28,11 +31,24 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue inventoryProductReserveRequestQueue() {
+        return new Queue("inventory.product.reserve", true);
+    }
+
+    @Bean
     public Binding inventoryProductBinding() {
         return BindingBuilder
                 .bind(inventoryProductRequestQueue())
                 .to(salesExchange())
                 .with(routingKey);
+    }
+
+    @Bean
+    public Binding inventoryProductReserveBinding() {
+        return BindingBuilder
+                .bind(inventoryProductReserveRequestQueue())
+                .to(salesExchange())
+                .with(routingKeyReserve);
     }
 
     @Bean

@@ -13,5 +13,6 @@
     </changeSet>
 
     <include file="/db/changelog/2025/01/01-01-changelog.xml"/>
-        <include file="db/changelog/2025/01/02-01-changelog.sql" context="insert-data"/>
+    <include file="db/changelog/2025/01/02-01-changelog.sql" context="insert-data"/>
+    <include file="db/changelog/2025/01/03-01-changelog.xml"/>
 </databaseChangeLog>

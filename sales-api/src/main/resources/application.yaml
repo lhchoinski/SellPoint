@@ -45,5 +45,5 @@ spring:
       sale-completed: sale.completed
       sale-failed: sale.failed
       inventory:
-        reserve: inventory.reserve
+        reserve: inventory.product.reserve
         product: inventory.product.request

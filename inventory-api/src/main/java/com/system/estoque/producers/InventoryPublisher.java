@@ -1,8 +1,8 @@
-package com.system.sales.producer;
+package com.system.estoque.producers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.sales.enums.OutboxStatus;
-import com.system.sales.repositories.OutboxEventRepository;
+import com.system.estoque.enums.OutboxStatus;
+import com.system.estoque.repositories.OutboxEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,10 +16,10 @@ public class InventoryPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${spring.rabbitmq.exchanges.inventory}")
+    @Value("${spring.rabbitmq.exchanges.payment}")
     private String exchange;
 
-    @Value("${spring.rabbitmq.routing-keys.inventory.reserve}")
+    @Value("${spring.rabbitmq.routing-keys.payment.started}")
     private String routingKey;
 
     private final ObjectMapper objectMapper;

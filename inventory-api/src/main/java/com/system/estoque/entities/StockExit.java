@@ -22,9 +22,6 @@ public class StockExit extends BaseSoftDeleteEntity {
     @JoinColumn(name = "item_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Product product;
 
-    @Column(name = "item_id")
-    private UUID itemId;
-
     private Integer quantity;
 
     private LocalDateTime date_exit;

@@ -1,7 +1,7 @@
 package com.system.sales.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.sales.component.DistributedLockComponent;
 import com.system.sales.dto.ProductInventoryDTO;
 import com.system.sales.dto.SaleDTO;
 import com.system.sales.dto.inventory.StockReserveCommand;
@@ -32,65 +32,61 @@ public class SaleServiceImpl implements SaleService {
 
     private final SaleRepository saleRepository;
     private final SaleProductRepository saleProductRepository;
-
-    private final DistributedLockComponent distributedLockComponent;
     private final OutboxEventRepository outboxEventRepository;
-
     private final InventoryService inventoryService;
-
     private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
-    public void processSaleStarted(SaleDTO saleDTO) {
-        String lockKey = "sale:lock:" + saleDTO.getId();
+    public void saleStartedProcess(SaleDTO saleDTO) throws JsonProcessingException {
+        Sale sale = createSale(saleDTO);
+        List<SaleProduct> saleProducts =  createSaleProducts(saleDTO, sale);
 
-        distributedLockComponent.executeWithLock(lockKey, 5, 10, () -> {
-            try {
+        sale.setTotalAmount(sale.calculateTotalAmount(saleProducts));
+        saleRepository.save(sale);
 
-                Sale sale = new Sale();
-                sale.setSaleStatus(IN_PROGRESS);
-                sale.setCustomerId(saleDTO.getCustomerId());
-                sale.setTimestamp(LocalDateTime.now());
-                sale.setTotalAmount(BigDecimal.ZERO);
+        sendToOutbox(saleDTO,sale);
+    }
 
-                saleRepository.save(sale);
+    private Sale createSale(SaleDTO saleDTO) {
+        Sale sale = new Sale();
+        sale.setSaleStatus(IN_PROGRESS);
+        sale.setCustomerId(saleDTO.getCustomerId());
+        sale.setTimestamp(LocalDateTime.now());
+        sale.setTotalAmount(BigDecimal.ZERO);
 
-                List<SaleProduct> saleProducts = saleDTO.getSaleProductDTOS().stream().map(product -> {
-                    ProductInventoryDTO productInventory = inventoryService.findProductsById(product.getId());
+       return saleRepository.save(sale);
+    }
 
-                    SaleProduct saleProduct = new SaleProduct();
-                    saleProduct.setSale(sale);
-                    saleProduct.setName(productInventory.getName());
-                    saleProduct.setProductId(productInventory.getId());
-                    saleProduct.setPrice(productInventory.getPrice());
-                    saleProduct.setQuantity(product.getQuantity());
+    private List<SaleProduct> createSaleProducts(SaleDTO saleDTO, Sale sale) {
+        List<SaleProduct> saleProducts = saleDTO.getSaleProductDTOS().stream().map(product -> {
+            ProductInventoryDTO productInventory = inventoryService.findProductsById(product.getId());
 
-                    return saleProduct;
-                }).toList();
+            SaleProduct saleProduct = new SaleProduct();
+            saleProduct.setSale(sale);
+            saleProduct.setName(productInventory.getName());
+            saleProduct.setProductId(productInventory.getId());
+            saleProduct.setPrice(productInventory.getPrice());
+            saleProduct.setQuantity(product.getQuantity());
 
-                saleProductRepository.saveAll(saleProducts);
+            return saleProduct;
+        }).toList();
 
-                sale.setTotalAmount(sale.calculateTotalAmount(saleProducts));
-                saleRepository.save(sale);
+       return saleProductRepository.saveAll(saleProducts);
+    }
 
-                StockReserveCommand command = new StockReserveCommand(sale.getId(), saleDTO.getSaleProductDTOS());
+    private void sendToOutbox(SaleDTO saleDTO, Sale sale) throws JsonProcessingException {
+        StockReserveCommand command = new StockReserveCommand(sale.getId(), saleDTO.getSaleProductDTOS());
 
-                OutboxEvent outbox = OutboxEvent.builder()
-                        .aggregateType("SALE")
-                        .aggregateId(sale.getId().toString())
-                        .eventType("StockReserveCommand")
-                        .payload(objectMapper.writeValueAsString(command))
-                        .status(OutboxStatus.PENDING)
-                        .createdAt(LocalDateTime.now())
-                        .build();
+        OutboxEvent outbox = OutboxEvent.builder()
+                .aggregateType("SALE")
+                .aggregateId(sale.getId().toString())
+                .eventType("StockReserveCommand")
+                .payload(objectMapper.writeValueAsString(command))
+                .status(OutboxStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-                outboxEventRepository.save(outbox);
-
-            } catch (Exception e) {
-                throw new RuntimeException("Error", e);
-            }
-            return null;
-        });
+        outboxEventRepository.save(outbox);
     }
 }

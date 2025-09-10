@@ -1,4 +1,4 @@
-package com.system.sales.component;
+package com.system.estoque.components;
 
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;

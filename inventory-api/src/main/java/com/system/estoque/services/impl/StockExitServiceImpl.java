@@ -1,15 +1,19 @@
 package com.system.estoque.services.impl;
 
-import com.system.estoque.dtos.PageDTO;
-import com.system.estoque.dtos.SaleDTO;
-import com.system.estoque.dtos.SaleItemDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.system.estoque.components.DistributedLockComponent;
+import com.system.estoque.dtos.*;
 import com.system.estoque.dtos.entities.StockExitDTO;
+import com.system.estoque.entities.OutboxEvent;
 import com.system.estoque.entities.Product;
 import com.system.estoque.entities.StockExit;
 import com.system.estoque.entities.User;
+import com.system.estoque.enums.OutboxStatus;
 import com.system.estoque.exeptions.BadRequestException;
 import com.system.estoque.exeptions.NotFoundException;
 import com.system.estoque.mappers.StockExitMapper;
+import com.system.estoque.repositories.OutboxEventRepository;
 import com.system.estoque.repositories.ProductRepository;
 import com.system.estoque.repositories.StockExitRepository;
 import com.system.estoque.repositories.UserRepository;
@@ -26,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -36,7 +41,11 @@ public class StockExitServiceImpl implements StockExitService {
     private final StockExitRepository stockExitRepository;
     private final StockExitMapper stockExitMapper;
     private final ProductRepository productRepository;
+    private final OutboxEventRepository outboxEventRepository;
     private final UserRepository userRepository;
+
+    private final ObjectMapper objectMapper;
+    private final DistributedLockComponent distributedLockComponent;
 
     @Override
     public PageDTO<StockExitDTO> findAll(String search, Pageable pageable) {
@@ -58,14 +67,13 @@ public class StockExitServiceImpl implements StockExitService {
 
     @Override
     @Transactional
-//    @RabbitListener(queues = "stock.queue")
     public String create(SaleDTO saleDTO) {
         try {
             for (SaleItemDTO item : saleDTO.getItems()) {
 
                 StockExit stockExit = new StockExit();
 
-                stockExit.setItemId(item.getProductId());
+//                stockExit.setProduct(item.getProductId());
                 stockExit.setUserId(saleDTO.getUser().getId());
                 stockExit.setQuantity(item.getQuantity());
                 stockExit.setDate_exit(LocalDateTime.now());
@@ -125,6 +133,63 @@ public class StockExitServiceImpl implements StockExitService {
         stockExit.setDeletedAt(LocalDateTime.now());
 
         stockExitRepository.save(stockExit);
+    }
+
+    @Transactional
+    public void reserveStock(StockReserveCommand command) throws JsonProcessingException {
+        for (SaleProductDTO item : command.getSaleProductDTOS()) {
+            String lockKey = "product:lock:" + item.getId();
+
+            distributedLockComponent.executeWithLock(lockKey, 5, 10, () -> {
+                Product product = productRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Produto não encontrado: " + item.getId()));
+
+                int available = product.getQuantity() - product.getReservedQuantity();
+
+                if (available < item.getQuantity()) {
+
+                    try {
+                        publishStockRejected(command, "Estoque insuficiente para o produto: " + item.getId());
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return null;
+                }
+
+                product.setReservedQuantity(product.getReservedQuantity() + item.getQuantity());
+                productRepository.save(product);
+
+                return null;
+            });
+        }
+
+        publishStockReserved(command);
+    }
+
+    private void publishStockReserved(StockReserveCommand command) throws JsonProcessingException {
+        OutboxEvent event = OutboxEvent.builder()
+                .aggregateType("INVENTORY")
+                .aggregateId(command.getSaleId().toString())
+                .eventType("StockReservedEvent")
+                .payload(objectMapper.writeValueAsString(command))
+                .status(OutboxStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        outboxEventRepository.save(event);
+    }
+
+    private void publishStockRejected(StockReserveCommand command, String reason) throws JsonProcessingException {
+        OutboxEvent event = OutboxEvent.builder()
+                .aggregateType("INVENTORY")
+                .aggregateId(command.getSaleId().toString())
+                .eventType("StockRejectedEvent")
+                .payload(objectMapper.writeValueAsString(Map.of("reason", reason, "saleId", command.getSaleId())))
+                .status(OutboxStatus.PENDING)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        outboxEventRepository.save(event);
     }
 
     private StockExit getStockExit(Long id) throws NotFoundException {
