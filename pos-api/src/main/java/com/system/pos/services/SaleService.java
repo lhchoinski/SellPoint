@@ -31,7 +31,7 @@ public class SaleService {
 
             OutboxEvent outboxEvent = OutboxEvent.builder()
                     .aggregateType(SALE)
-                    .aggregateId(saleDTO.getCustomerId().toString())
+                    .aggregateId(UUID.randomUUID().toString()) // pegar id do usuario logado
                     .eventType(SALE_STARTED_EVENT)
                     .payload(payload)
                     .status(OutboxStatus.PENDING)

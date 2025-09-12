@@ -40,11 +40,12 @@ public class SaleServiceImpl implements SaleService {
     @Transactional
     public void saleStartedProcess(SaleDTO saleDTO) throws JsonProcessingException {
         Sale sale = createSale(saleDTO);
-        List<SaleProduct> saleProducts =  createSaleProducts(saleDTO, sale);
+        List<SaleProduct> saleProducts = createSaleProducts(saleDTO, sale);
 
+        sale.setProducts(saleProducts);
         sale.setTotalAmount(sale.calculateTotalAmount(saleProducts));
-        saleRepository.save(sale);
 
+        saleRepository.save(sale);
         sendToOutbox(saleDTO,sale);
     }
 
@@ -55,11 +56,11 @@ public class SaleServiceImpl implements SaleService {
         sale.setTimestamp(LocalDateTime.now());
         sale.setTotalAmount(BigDecimal.ZERO);
 
-       return saleRepository.save(sale);
+       return sale;
     }
 
     private List<SaleProduct> createSaleProducts(SaleDTO saleDTO, Sale sale) {
-        List<SaleProduct> saleProducts = saleDTO.getSaleProductDTOS().stream().map(product -> {
+        return saleDTO.getSaleProductDTOS().stream().map(product -> {
             ProductInventoryDTO productInventory = inventoryService.findProductsById(product.getId());
 
             SaleProduct saleProduct = new SaleProduct();
@@ -71,8 +72,6 @@ public class SaleServiceImpl implements SaleService {
 
             return saleProduct;
         }).toList();
-
-       return saleProductRepository.saveAll(saleProducts);
     }
 
     private void sendToOutbox(SaleDTO saleDTO, Sale sale) throws JsonProcessingException {

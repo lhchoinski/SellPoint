@@ -1,31 +1,33 @@
-package com.system.estoque.producers;
+package com.system.pos.messaging;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.estoque.enums.OutboxStatus;
-import com.system.estoque.repositories.OutboxEventRepository;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.system.pos.enums.OutboxStatus;
+import com.system.pos.repositories.OutboxEventRepository;
 
 @Component
 @RequiredArgsConstructor
-public class InventoryPublisher {
+public class OutboxPaymentPublisher {
 
-    private final RabbitTemplate rabbitTemplate;
-
-    @Value("${spring.rabbitmq.exchanges.payment}")
+    @Value("${spring.rabbitmq.exchanges.payments}")
     private String exchange;
 
-    @Value("${spring.rabbitmq.routing-keys.payment.started}")
+    @Value("${spring.rabbitmq.routing-keys.payment-update}")
     private String routingKey;
 
-    private final ObjectMapper objectMapper;
+    private final RabbitTemplate rabbitTemplate;
     private final OutboxEventRepository outboxEventRepository;
 
-    public void publishReserveEvent() {
+    private final ObjectMapper objectMapper;
+
+    public void publishPendingEvent() {
         outboxEventRepository.findAllByStatus(OutboxStatus.PENDING).forEach(event -> {
             try {
                 rabbitTemplate.convertAndSend(exchange, routingKey, objectMapper.readTree(event.getPayload()));
@@ -33,6 +35,7 @@ public class InventoryPublisher {
                 event.setSentAt(LocalDateTime.now());
             } catch (Exception e) {
                 event.setStatus(OutboxStatus.FAILED);
+                // log do erro, opcional
             }
             outboxEventRepository.save(event);
         });
