@@ -1,8 +1,8 @@
 package com.system.sales.service;
 
-import com.system.sales.dto.PaymentDetails;
+import java.util.UUID;
 
 public interface PaymentService {
 
-    void processPayment(PaymentDetails paymentDetails);
+    void processPayment(UUID saleId);
 }

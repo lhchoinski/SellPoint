@@ -10,7 +10,6 @@ import com.system.sales.entities.Sale;
 import com.system.sales.entities.SaleProduct;
 import com.system.sales.enums.OutboxStatus;
 import com.system.sales.repositories.OutboxEventRepository;
-import com.system.sales.repositories.SaleProductRepository;
 import com.system.sales.repositories.SaleRepository;
 import com.system.sales.service.InventoryService;
 import com.system.sales.service.SaleService;
@@ -31,7 +30,6 @@ import static com.system.sales.enums.SaleStatus.IN_PROGRESS;
 public class SaleServiceImpl implements SaleService {
 
     private final SaleRepository saleRepository;
-    private final SaleProductRepository saleProductRepository;
     private final OutboxEventRepository outboxEventRepository;
     private final InventoryService inventoryService;
     private final ObjectMapper objectMapper;

@@ -15,7 +15,7 @@ public class SaleController {
 
     private final SaleService saleService;
 
-    @PostMapping
+    @PostMapping("/started")
     public void startSale(@RequestBody SaleDTO saleDTO) {
         saleService.startSale(saleDTO);
     }

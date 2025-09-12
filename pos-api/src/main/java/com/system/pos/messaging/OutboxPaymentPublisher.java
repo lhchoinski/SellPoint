@@ -19,7 +19,7 @@ public class OutboxPaymentPublisher {
     @Value("${spring.rabbitmq.exchanges.payments}")
     private String exchange;
 
-    @Value("${spring.rabbitmq.routing-keys.payment-update}")
+    @Value("${spring.rabbitmq.routing-keys.payments.update}")
     private String routingKey;
 
     private final RabbitTemplate rabbitTemplate;
@@ -36,6 +36,19 @@ public class OutboxPaymentPublisher {
             } catch (Exception e) {
                 event.setStatus(OutboxStatus.FAILED);
                 // log do erro, opcional
+            }
+            outboxEventRepository.save(event);
+        });
+    }
+
+    public void publishReserveEvent() {
+        outboxEventRepository.findAllByStatus(OutboxStatus.PENDING).forEach(event -> {
+            try {
+                rabbitTemplate.convertAndSend(exchange, routingKey, objectMapper.readTree(event.getPayload()));
+                event.setStatus(OutboxStatus.SENT);
+                event.setSentAt(LocalDateTime.now());
+            } catch (Exception e) {
+                event.setStatus(OutboxStatus.FAILED);
             }
             outboxEventRepository.save(event);
         });

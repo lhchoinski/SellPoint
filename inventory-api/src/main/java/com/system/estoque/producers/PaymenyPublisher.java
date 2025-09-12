@@ -16,10 +16,10 @@ public class PaymenyPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${spring.rabbitmq.exchanges.payment}")
+    @Value("${spring.rabbitmq.exchanges.payments}")
     private String exchange;
 
-    @Value("${spring.rabbitmq.routing-keys.payment.started}")
+    @Value("${spring.rabbitmq.routing-keys.payments.started}")
     private String routingKey;
 
     private final ObjectMapper objectMapper;

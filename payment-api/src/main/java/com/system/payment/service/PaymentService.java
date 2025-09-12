@@ -1,23 +1,16 @@
 package com.system.payment.service;
 
-import com.system.payment.dtos.SaleDTO;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import com.system.payment.dtos.PaymentCommandDTO;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PaymentService {
 
-    private final RabbitTemplate rabbitTemplate;
-
-    public PaymentService(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
+    public void processPayment(PaymentCommandDTO paymentCommandDTO) {
+        createPayment(paymentCommandDTO);
     }
 
-    @RabbitListener(queues = "payment.queue")
-    public void processPayment(SaleDTO saleDTO) {
-        System.out.println("Payment: Validando pagamento para: " + saleDTO.getItems().toString());
+    private void createPayment(PaymentCommandDTO paymentCommandDTO) {
 
-        rabbitTemplate.convertSendAndReceive("stock.queue", saleDTO);
     }
 }

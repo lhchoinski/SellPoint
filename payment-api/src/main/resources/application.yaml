@@ -38,8 +38,14 @@ spring:
     port: ${API_PAYMENT_RABBITMQ_PORT}
     username: ${API_PAYMENT_RABBITMQ_USERNAME}
     password: ${API_PAYMENT_RABBITMQ_PASSWORD}
-
-broker:
-  queue:
-    email:
-      name: default.email
+    exchanges:
+      sales: sales-exchange
+      inventory: inventory-exchange
+      payments: payments-exchange
+    routing-keys:
+      inventory:
+        reserve: inventory.product.reserve
+        product: inventory.product.request
+      payments:
+        started: payments.payment.started
+        update: payments.payment.update

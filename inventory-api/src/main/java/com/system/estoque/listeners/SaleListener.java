@@ -18,7 +18,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class InventoryListener {
+public class SaleListener {
 
     private final ObjectMapper objectMapper;
     private final ProductRepository productRepository;
