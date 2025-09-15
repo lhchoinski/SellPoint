@@ -1,7 +1,6 @@
 package com.system.sales.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.system.sales.component.DistributedLockComponent;
 import com.system.sales.producer.InventoryPublisher;
 import com.system.sales.repositories.OutboxEventRepository;
 import com.system.sales.repositories.SaleRepository;
@@ -26,9 +25,6 @@ class SaleServiceImplTest {
 
     @Mock
     private OutboxEventRepository outboxEventRepository;
-
-    @Mock
-    private DistributedLockComponent distributedLockComponent;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

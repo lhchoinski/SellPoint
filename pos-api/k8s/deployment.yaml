@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pos-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pos-api
+  template:
+    metadata:
+      labels:
+        app: pos-api
+    spec:
+      containers:
+        - name: pos-api
+          image: pos-api:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
