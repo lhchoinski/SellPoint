@@ -41,12 +41,16 @@ spring:
     exchanges:
       sales: sales-exchange
       inventory: inventory-exchange
+      payments: payments-exchange
     routing-keys:
       sale-completed: sale.completed
       sale-failed: sale.failed
       inventory:
         reserve: inventory.product.reserve
         product: inventory.product.request
+      payments:
+        started: payments.payment.started
+        update: payments.payment.update
 
 management:
   endpoints:

@@ -1,3 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sales-config
+data:
+  API_SALES_DATABASE_HOST: "postgres"
+  API_SALES_DATABASE_PORT: "5432"
+  API_SALES_DATABASE_DB: "sp_sales"
+  API_SALES_DATABASE_SCHEMA: "public"
+  API_SALES_REDIS_HOST: "redis"
+  API_SALES_REDIS_PORT: "6379"
+  API_SALES_REDIS_DB: "0"
+  API_SALES_RABBITMQ_HOST: "rabbitmq"
+  API_SALES_RABBITMQ_PORT: "5672"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sales-secrets
+type: Opaque
+stringData:
+  API_SALES_DATABASE_USERNAME: "postgres"
+  API_SALES_DATABASE_PASSWORD: "password"
+  API_SALES_REDIS_PASSWORD: "admin"
+  API_SALES_RABBITMQ_USERNAME: "guest"
+  API_SALES_RABBITMQ_PASSWORD: "guest"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,12 +44,23 @@ spec:
       containers:
         - name: sales-api
           image: sales-api:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8080
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/sp_sales
-            - name: SPRING_DATASOURCE_USERNAME
-              value: postgres
-            - name: SPRING_DATASOURCE_PASSWORD
-              value: password
+          envFrom:
+            - configMapRef:
+                name: sales-config
+            - secretRef:
+                name: sales-secrets
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10

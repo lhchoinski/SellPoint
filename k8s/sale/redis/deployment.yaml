@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: redis
   labels:
     app: redis
 spec:
+  serviceName: "redis"
   replicas: 1
   selector:
     matchLabels:
@@ -16,13 +17,19 @@ spec:
     spec:
       containers:
         - name: redis
-          image: redis
+          image: redis:7
           ports:
             - containerPort: 6379
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "200m"
+          args: ["--requirepass", "admin"]
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          command: ["redis-server", "--appendonly", "yes"]
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

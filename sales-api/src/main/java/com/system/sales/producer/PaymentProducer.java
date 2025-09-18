@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 public class PaymentProducer {
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${mq.exchanges.payment}")
+    @Value("${spring.rabbitmq.exchanges.payments}")
     private String paymentExchange;
 
-    @Value("${mq.routing-keys.payment.process}")
+    @Value("${spring.rabbitmq.routing-keys.payments.update}")
     private String paymentProcessRoutingKey;
 
     public void createPaymentCommand(PaymentCommandDTO command) {
